@@ -1,0 +1,59 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/97b80cc5-1c67-4280-8567-483b2b4739a2')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/97b80cc5-1c67-4280-8567-483b2b4739a2')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2022-09-01-preview",
+            "properties": {
+                "displayName": "Exceeded cost usage of Billable Data",
+                "description": "40GB を越えるデータが発生したらインシデントを作成するサンプル",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let queryperiod = 1d;\r\nUsage\r\n| where TimeGenerated > ago(queryperiod)\r\n| where DataType !endswith \"_CL\"\r\n| where IsBillable\r\n| summarize DataGB = sum(Quantity / 1024) // Quantity is Mbytes\r\n| where DataGB > 40",
+                "queryFrequency": "P1D",
+                "queryPeriod": "P1D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "startTimeUtc": "2023-03-28T15:00:00.000Z",
+                "tactics": [],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": {
+                    "alertDisplayNameFormat": "Sentinel Ingest Data Exceeded {{DataGB}} GB in Last Days!",
+                    "alertDescriptionFormat": "Sentinel に取り込まれたアラートが過去1日で {{DataGB}} GB を越えました。ご注意下さい。",
+                    "alertDynamicProperties": []
+                },
+                "customDetails": null,
+                "entityMappings": null,
+                "sentinelEntitiesMappings": null,
+                "templateVersion": null
+            }
+        }
+    ]
+}
